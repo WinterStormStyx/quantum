@@ -10,6 +10,7 @@ There is only a few features that will be useful during the project:
 
 #### Branches
 
+
 A branch is basically a snapshot of the code. When you start coding, you create a new branch off of the main branch. Give this branch a name, and then you can make any edits/additions to the code that you want. Think of this branch as "your version" of the code, its your personal place to make changes without anyone else interfering with it. 
 
 In VS Code you make a new branch by clicking on the branch name in the bottom left of your screen. It should show the branch name next to a logo with three circles. If you click on it, a popup should appear at the top of your screen. Simply type out the name of your new branch and hit enter. Now the name of the branch in the bottom left of your screen should reflect that you are working in the new branch you just made!
