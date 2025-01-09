@@ -1,17 +1,20 @@
-import mttkinter as tkinter # really dirty fix for a RunTime error you get when you add Aer for noise
 
-from qiskit import QuantumCircuit
+#Hey Em, ive taken your code and tried to implement the 5 qubit error correction, the trouble im having is the inbuilt noise model that seems to be messing with the decoding.
+#Right now im trying to see if adding waiting gates for unused qubits offers fidelity increase
+import mttkinter as tkinter # really dirty fix for a RunTime error you get when you add Aer for noise
+from qiskit import QuantumCircuit, transpile
+from qiskit_aer import Aer
 from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from qiskit_ibm_runtime import EstimatorV2
-from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
+from qiskit_ibm_runtime.fake_provider import FakeQuebec
 
 from matplotlib import pyplot as plt
 import numpy as np
 
 
-def shorCode(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = True, drawStates = False):
+def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = False, drawStates = False):
     """Creates the circuit for Shors Code with a given initial state and provided errors
 
     Args:
@@ -26,13 +29,57 @@ def shorCode(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
         QuantumCircuit: the created quantum circuit
     """
     # Build a quantum circuit
-    qc = QuantumCircuit(9)
+    qc = QuantumCircuit(5)
 
-    qc.prepare_state(Statevector.from_label(initial + "0"*8), range(9))
- 
-    qc.cx(0, [3, 6])
-    qc.h([0, 3, 6])
-    qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
+    qc.prepare_state(initial, 2)
+    qc.prepare_state("0", 0)
+    qc.prepare_state("0", 1)
+    qc.prepare_state("0", 3)
+    qc.prepare_state("0", 4)
+    
+    if drawStates:
+        psi = Statevector(qc)
+        psi.draw("bloch")  # psi is a Statevector object
+        plt.show()
+    qc.h([0, 1, 3])
+
+    qc.id([2, 4])
+
+    qc.mcp(np.pi,[1, 2, 3], 4)
+
+    qc.id(0)
+    
+
+    qc.x([1, 3])
+    qc.mcp(np.pi, [1, 2, 3], 4)
+    qc.x([1, 3])
+
+    qc.cx(2, 4)
+
+    qc.cx(0, [2, 4])
+
+    qc.cx(3, 2)
+
+    qc.cx(1, 4)
+    qc.mcp(np.pi, [3, 4], 2)
+
+    #decoding
+    qc.mcp(np.pi, [3, 4], 2)
+    qc.cx(1, 4)
+
+    qc.cx(3, 2)
+
+    qc.cx(0, [2, 4])
+
+    qc.cx(2, 4)
+
+    qc.x([1, 3])
+    qc.mcp(np.pi, [1, 2, 3], 4)
+    qc.x([1, 3])
+
+    qc.mcp(np.pi,[1, 2, 3], 4)
+
+    qc.h([0, 1, 3])
 
     # ERROR CAN OCCUR HERE
     if biterrors is not None:
@@ -41,25 +88,16 @@ def shorCode(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
         qc.z(phaseerrors)
     # --------------------
 
-    qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
-    qc.ccx([1, 4, 7], [2, 5, 8], [0, 3, 6])
-    qc.h([0, 3, 6])
-    qc.cx(0, [3, 6])
-    qc.ccx(3, 6, 0)
-
     if drawCircuit: # Return a drawing of the circuit using MatPlotLib
         qc.draw("mpl")
         plt.show()
 
-    if drawStates:
-        psi = Statevector(qc)
-        psi.draw("bloch")  # psi is a Statevector object
-        plt.show()
+    
     
     return qc
 
 
-def measurement(qc, measurement_basis = "Z", num_trials = 10):
+def measurement(qc, measurement_basis = "Z", num_trials = 1):
     """Runs a quantum circuit using simulation and then measures the output (with noise), showing a plot of it.
 
     Args:
@@ -67,11 +105,11 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
         measurement_basis (str, optional): The basis in which measurement should occur. Defaults to "Z".
         num_trials (int, optional): How many times the simulation and measurement should be repeated. Defaults to 10.
     """
-    observables_labels = [i*"I" + measurement_basis + (8-i)*"I" for i in range(9)]
+    observables_labels = [i*"I" + measurement_basis + (4-i)*"I" for i in range(5)]
     observables = [SparsePauliOp(label) for label in observables_labels]
     
     # Set up code to run on simulator 
-    backend = FakeAlmadenV2()
+    backend = FakeQuebec()
     estimator = EstimatorV2(backend)
     
     # Convert to an ISA circuit and draw this
@@ -95,12 +133,26 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
     plt.ylabel("Values")
     plt.legend()
     plt.show()
+
+    # simulator = Aer.get_backend('statevector_simulator')
+    # new_circuit = transpile(qc, simulator)
+    # job = simulator.run(new_circuit)
+    # statevector_result = job.result()
+    # statevector = statevector_result.get_statevector()
+
+    # Print the statevector
+    # print("Statevector:", statevector)
+
+    # Plot Bloch sphere representation of the statevector
+    # psi = Statevector(statevector)
+    # psi.draw('bloch')
+    # plt.show()
     
 
 # Lets see what happens when we add a bunch of random gates and try to measure
-
+print()
 biterrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 phaseerrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 
-qc = shorCode("+", biterrors=None, phaseerrors=None, drawStates=True)
-measurement(qc, measurement_basis="X")
+qc = Laflamme(initial = "1", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=False)
+measurement(qc, measurement_basis="Z")
