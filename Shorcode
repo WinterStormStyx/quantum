@@ -1,9 +1,5 @@
-"""
-Hello world code from https://docs.quantum.ibm.com/guides/hello-world
-"""
-
 from matplotlib import pyplot as plt
-
+import numpy as np
 from qiskit import QuantumCircuit
 from qiskit.quantum_info import SparsePauliOp, Statevector, DensityMatrix
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
@@ -12,24 +8,62 @@ from qiskit_ibm_runtime import EstimatorV2
 from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
 
 # Build a quantum circuit
-qc = QuantumCircuit(9)
 
-qc.prepare_state(000000000, [i for i in range(9)])
+#repetition
+
+qc = QuantumCircuit(9)
+qc.prepare_state([1/np.sqrt(2), 1/np.sqrt(2)], 0)
+qc.prepare_state(00000000, [i for i in range(1, 9)])
+
+qc.cx(0, [3, 6])
+qc.h([0, 3, 6])
+
+qc.cx(0, [1, 2])
+qc.cx(3, [4, 5])
+qc.cx(6, [7, 8])
+
+#flipping
+
+qc.x(2)
+qc.z(8)
+
+#unflipping
+qc.cx(0, [1, 2])
+qc.cx(3, [4, 5])
+qc.cx(6, [7, 8])
+
+qc.ccx(1, 2, 0)
+qc.ccx(4, 5, 3)
+qc.ccx(7, 8, 6)
+
+qc.h([0, 3, 6])
+
+qc.cx(0, [3, 6])
+qc.ccx(3, 6, 0)
+
+
+
+
+
+
+
+
+
 
 
 # Return a drawing of the circuit using MatPlotLib
-qc.draw("mpl")
-plt.show()
+# qc.draw("mpl")
+# plt.show()
 
-psi = Statevector(qc)
-psi.draw("bloch")  # psi is a Statevector object
-plt.show()
+# psi = Statevector(qc)
+# psi.draw("bloch")  # psi is a Statevector object
+# plt.show()
  
-DensityMatrix(psi).draw("qsphere")  # convert to a DensityMatrix and draw
-plt.show()
+# DensityMatrix(psi).draw("qsphere")  # convert to a DensityMatrix and draw
+# plt.show()
 
 # Set up six different observables.
-observables_labels = ["IZ", "IX", "ZI", "XI", "ZZ", "XX"]
+observables_labels = ["ZIIIIIIII", "IZIIIIIII", "IIZIIIIII", "IIIZIIIII", "IIIIZIIII", "IIIIIZIII", "IIIIIIZII", "IIIIIIIZI", "IIIIIIIIX"]
 observables = [SparsePauliOp(label) for label in observables_labels]
 
 # Set up code to run on simulator 
@@ -40,8 +74,8 @@ estimator = EstimatorV2(backend)
 pm = generate_preset_pass_manager(backend=backend, optimization_level=1)
 isa_circuit = pm.run(qc)
 
-isa_circuit.draw("mpl", idle_wires=False)
-plt.show()
+# isa_circuit.draw("mpl", idle_wires=False)
+# plt.show()
 
 # layout-mapped observables
 mapped_observables = [
