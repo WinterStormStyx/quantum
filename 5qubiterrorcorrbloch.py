@@ -37,10 +37,6 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.prepare_state("0", 3)
     qc.prepare_state("0", 4)
     
-    if drawStates:
-        psi = Statevector(qc)
-        psi.draw("bloch")  # psi is a Statevector object
-        plt.show()
     qc.h([0, 1, 3])
 
     qc.id([2, 4])
@@ -48,7 +44,6 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.mcp(np.pi,[1, 2, 3], 4)
 
     qc.id(0)
-    
 
     qc.x([1, 3])
     qc.mcp(np.pi, [1, 2, 3], 4)
@@ -62,6 +57,13 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
 
     qc.cx(1, 4)
     qc.mcp(np.pi, [3, 4], 2)
+
+    # ERROR CAN OCCUR HERE
+    if biterrors is not None:
+        qc.x(biterrors)
+    if phaseerrors is not None:
+        qc.z(phaseerrors)
+    # --------------------
 
     #decoding
     qc.mcp(np.pi, [3, 4], 2)
@@ -80,19 +82,17 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.mcp(np.pi,[1, 2, 3], 4)
 
     qc.h([0, 1, 3])
-
-    # ERROR CAN OCCUR HERE
-    if biterrors is not None:
-        qc.x(biterrors)
-    if phaseerrors is not None:
-        qc.z(phaseerrors)
-    # --------------------
+    
+    qc.swap(2, 4)
 
     if drawCircuit: # Return a drawing of the circuit using MatPlotLib
         qc.draw("mpl")
         plt.show()
-
-    
+        
+    if drawStates:
+        psi = Statevector(qc)
+        psi.draw("bloch")  # psi is a Statevector object
+        plt.show()
     
     return qc
 
@@ -150,9 +150,11 @@ def measurement(qc, measurement_basis = "Z", num_trials = 1):
     
 
 # Lets see what happens when we add a bunch of random gates and try to measure
-print()
-biterrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
-phaseerrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 
-qc = Laflamme(initial = "1", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=False)
-measurement(qc, measurement_basis="Z")
+for i in range(1):
+    biterrors = [2] # np.random.randint(0, 5, size=np.random.randint(1, 5, size=1))
+    phaseerrors = None #np.random.randint(0, 5, size=np.random.randint(1, 5, size=1))
+    
+    qc = Laflamme(initial = "1", biterrors=biterrors, phaseerrors=phaseerrors, drawStates=True, drawCircuit=True)
+    measurement(qc, measurement_basis="Z")
+    
