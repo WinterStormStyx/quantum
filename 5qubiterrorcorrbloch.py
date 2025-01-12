@@ -9,7 +9,7 @@ from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 import qiskit.quantum_info as qi
 from qiskit_ibm_runtime import EstimatorV2
-from qiskit_ibm_runtime.fake_provider import FakeQuebec
+from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -54,13 +54,13 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
 
     qc.id([2, 4])
 
-    qc.mcp(np.pi,[1, 2, 3], 4)
+    qc.mcry(2*np.pi,[1, 2, 3], 4)
 
     qc.id(0)
     
 
     qc.x([1, 3])
-    qc.mcp(np.pi, [1, 2, 3], 4)
+    qc.mcry(2*np.pi, [1, 2, 3], [4])
     qc.x([1, 3])
 
     qc.cx(2, 4)
@@ -70,11 +70,11 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.cx(3, 2)
 
     qc.cx(1, 4)
-    qc.mcp(np.pi, [3, 4], 2)
+    qc.mcry(2*np.pi, [3, 4], [2])
     #flipping
-    qc.x(0)
+    # qc.x(2)
     #decoding
-    qc.mcp(np.pi, [3, 4], 2)
+    qc.mcry(2*np.pi, [3, 4], [2])
     qc.cx(1, 4)
 
     qc.cx(3, 2)
@@ -84,19 +84,16 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.cx(2, 4)
 
     qc.x([1, 3])
-    qc.mcp(np.pi, [1, 2, 3], 4)
+    qc.mcry(2*np.pi, [1, 2, 3], [4])
     qc.x([1, 3])
 
-    qc.mcp(np.pi,[1, 2, 3], 4)
+    qc.mcry(2*np.pi,[1, 2, 3], [4])
 
     qc.h([0, 1, 3])
 
     # #measuring and storing syndrome
     qc.measure([0, 1, 3, 4], range(4))
-
-    #test
-    # qc.unitary(err2, 2)
-
+    
     #error type 1
     qc.unitary(err1, 2).c_if(cl, 13)
 
@@ -121,8 +118,6 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
     qc.unitary(err5, 2).c_if(cl, 11)
     qc.unitary(err5, 2).c_if(cl, 14)
     qc.unitary(err5, 2).c_if(cl, 9)
-
-    print(cl)
 
     
 
@@ -156,7 +151,7 @@ def measurement(qc, measurement_basis = "Z", num_trials = 1):
     observables = [SparsePauliOp(label) for label in observables_labels]
     
     # Set up code to run on simulator 
-    backend = FakeQuebec()
+    backend = FakeAlmadenV2()
     estimator = EstimatorV2(backend)
     
     # Convert to an ISA circuit and draw this
@@ -200,5 +195,5 @@ def measurement(qc, measurement_basis = "Z", num_trials = 1):
 biterrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 phaseerrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 
-qc = Laflamme(initial = "1", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=False)
+qc = Laflamme(initial = "+", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=True)
 measurement(qc, measurement_basis="Z")
