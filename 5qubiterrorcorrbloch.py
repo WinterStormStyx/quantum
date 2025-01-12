@@ -50,6 +50,7 @@ def Laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = 
         psi = Statevector(qc)
         psi.draw("bloch")  # psi is a Statevector object
         plt.show()
+
     qc.h([0, 1, 3])
 
     qc.id([2, 4])
@@ -195,5 +196,5 @@ def measurement(qc, measurement_basis = "Z", num_trials = 1):
 biterrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 phaseerrors = np.random.randint(0, 9, size=np.random.randint(1, 9, size=1))
 
-qc = Laflamme(initial = "+", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=True)
+qc = Laflamme(initial = "0", biterrors=None, phaseerrors=None, drawStates=False, drawCircuit=False)
 measurement(qc, measurement_basis="Z")
