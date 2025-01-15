@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 from qiskit_aer import AerSimulator
 
+
 #Defining some gates by their matrix representation, theyre supposed to each correct their own type of error, which will be explained in the overleaf
 #there are 5 types of error results that can be corrected
 err1 = qi.Operator([[0, -1], [1, 0]])
@@ -25,6 +26,7 @@ qc = QuantumCircuit(qu, cl)
 
 #Visualize the encoding as a state Q encoded into a state abQcd, counting from qubit 0 (a) to qubit 4 (d). Our input state is qubit 2
 inp = "+"
+print("input: ", inp)
 qc.initialize(inp, 2)
 
 qc.initialize("0", 0)
@@ -52,7 +54,6 @@ qc.cx(1, 4)
 qc.mcry(2*np.pi, [3, 4], 2)
 
 #This is where an error can occur
-qc.x(2)
 
 # the entangled state now gets decoded
 
@@ -120,6 +121,9 @@ if inp == "+" or inp == "-":
 # For execution
 simulator = AerSimulator()
 compiled_circuit = transpile(qc, simulator)
+
+
+
 job = simulator.run(compiled_circuit, shots=10000)
 sim_result = job.result()
 counts = sim_result.get_counts()

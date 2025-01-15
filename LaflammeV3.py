@@ -24,7 +24,8 @@ qu = QuantumRegister(5)
 qc = QuantumCircuit(qu, cl)
 
 #Visualize the encoding as a state Q encoded into a state abQcd, counting from qubit 0 (a) to qubit 4 (d). Our input state is qubit 2
-inp = "-"
+inp = Statevector([1/np.sqrt(2), 1/np.sqrt(2)])
+
 qc.initialize(inp, 2)
 
 qc.initialize("0", 0)
@@ -52,7 +53,7 @@ qc.cx(1, 4)
 qc.mcry(2*np.pi, [3, 4], 2)
 
 #This is where an error can occur
-qc.z(4)
+qc.x(1)
 
 # the entangled state now gets decoded
 
@@ -106,8 +107,8 @@ qc.unitary(err5, 2).c_if(cl, 13)
 qc.unitary(err5, 2).c_if(cl, 7)
 qc.unitary(err5, 2).c_if(cl, 9)
 
-
-
+qc.draw(output="mpl")
+plt.show()
 
 #okay now, this code works differently and effectively 'cheats' by calculating the remaining statevector. Because i calculate the statevector from the partial trace of the entire density matrix (5 qubits), i can recover the initial state up to a global phase (this is why the - state seems to have a sign flip, but its just a global phase of e^ipi)
 
@@ -115,5 +116,6 @@ statevector_simulator = Aer.get_backend('statevector_simulator')
 job_sv = statevector_simulator.run(transpile(qc, statevector_simulator))
 result_sv = job_sv.result()
 statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4])
-# statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4]).to_statevector()
+statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4]).to_statevector()
 print(statevector)
+print(np.dot(np.conj(inp.data), statevector.data)**2)
