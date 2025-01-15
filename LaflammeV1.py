@@ -9,6 +9,7 @@ from qiskit_ibm_runtime.fake_provider import FakeQuebec
 from matplotlib import pyplot as plt
 import numpy as np
 
+# This one doesn't have measurements so does NOT work
 
 def laflamme(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = False, drawStates = False):
     """Creates the circuit for Shors Code with a given initial state and provided errors
