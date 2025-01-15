@@ -1,6 +1,18 @@
 from LaflammeV2 import measure, laflamme
-from basis import Basis
+from Shor import shor, measurement
+from Basis import Basis
+import numpy as np
 
+# Actually using the code here to make it cleaner
+
+# Shor
+for i in range(4):
+    bit = np.random.randint(0, 9, size=1) # find a bit for errors
+
+    qc = shor("0", biterrors=bit, phaseerrors=bit, drawCircuit=True, drawStates=True)
+    measurement(qc, measurement_basis="Z")
+
+# Laflamme
 for error in [0, 1, 2, 3, 4]:
     for state in ["0", "1", "+", "-"]:
         # Measure in both basis

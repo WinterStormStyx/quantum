@@ -6,7 +6,7 @@ import qiskit.quantum_info as qi
 import numpy as np
 from qiskit_aer import AerSimulator
 
-from basis import Basis
+from Basis import Basis
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning) 
