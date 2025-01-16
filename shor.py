@@ -33,6 +33,9 @@ def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = Fals
         qc.z(phaseerrors)
     # --------------------
     
+    qc = hadamard(qc)
+    qc = shorDecode(qc)
+    
     if drawCircuit: # Return a drawing of the circuit using MatPlotLib
         qc.draw("mpl")
         plt.show()
@@ -55,10 +58,10 @@ def shorEncode(initial = "0"):
     Returns:
         QuantumCircuit: the created quantum circuit
     """
-    # Build a quantum circuit
-    qc = QuantumCircuit(9)
+    # Build a quantum circuit with 9 qubits and 9 classical bits
+    qc = QuantumCircuit(9, 9)
 
-    qc.prepare_state("0", 0)
+    qc.prepare_state(initial, 0)
     qc.prepare_state("0", 1)
     qc.prepare_state("0", 2)
     qc.prepare_state("0", 3)
@@ -66,11 +69,13 @@ def shorEncode(initial = "0"):
     qc.prepare_state("0", 5)
     qc.prepare_state("0", 6)
     qc.prepare_state("0", 7)
-    qc.prepare_state(initial, 8)
+    qc.prepare_state("0", 8)
  
     qc.cx(0, [3, 6])
     qc.h([0, 3, 6])
     qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
+    
+    return qc
 
 
 def shorDecode(qc):
@@ -128,3 +133,24 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
     plt.legend()
     plt.show()
 
+
+def hadamard(qc):
+
+    qc.x([0, 6, 7, 8]) # qc.x([0, 1, 2, 6, 7, 8])
+    qc = controlledH(qc)
+    qc.x([0, 6, 7, 8]) # qc.x([0, 1, 2, 6, 7, 8])
+
+    qc = controlledH(qc)
+    
+    return qc
+
+
+def controlledH(qc):
+    # still need to implement majority vote
+    qc.cx(8, [6, 7])
+    qc.x(3)
+    qc.ch(0, 8)
+    qc.ch(3, 8)
+    qc.x(3)
+    qc.cx(8, [6, 7])
+    return qc
