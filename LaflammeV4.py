@@ -1,13 +1,15 @@
 #importing modules, probably way too many, however, im scared to delete any so please feel free to work on it
 from qiskit import QuantumCircuit, ClassicalRegister, QuantumRegister
 from qiskit import transpile
-from qiskit.providers.basic_provider import BasicSimulator
 import qiskit.quantum_info as qi
 from qiskit.quantum_info import SparsePauliOp, Statevector, partial_trace
 from matplotlib import pyplot as plt
 import numpy as np
 from qiskit_aer import Aer
 
+#fidelity is a function which has for input i, the index of the element, fidarr, the element at the specified index and inp, the reference input
+#what it does is calculating the innerproduct, and compose a string indicating the test variant depending on the index.
+#because there are 15 tests + 1 no error, every multiple of 5 until 10 (np.floor(i/5)) represents (bit, phase or flip of both), then the modulus indicates on what bit this flip has been performed
 def fidelity(i, fidarr, inp):
     fid = float(np.dot(np.conj(fidarr.data), inp.data))**2
     div = np.floor(i/5)
@@ -135,8 +137,10 @@ qcd.unitary(err5, 2).c_if(cld, 9)
 circarr = np.zeros((16, 2), dtype=np.complex128)
 statevector_simulator = Aer.get_backend('statevector_simulator')
 
-#now im building a circuit for every single error plus no error and store its result in an array together with its test id which i need for a wrapper function which will output some useful text
-#the function is called fidelity
+#now im building a circuit for every single error plus no error and store its result in an array together with its test id which i need for a wrapper function which will output some useful text.
+#I build the different circuits by having an encoding circuit (qc), an error circuit (qce) and a decoding plus error correction circuit (qcd)
+#I need to build the same 3 circuits 5 times with the error happening on a different qubit, instead of storing the circuit, i store statevector which prevents memory from flooding
+#it is important that the built circuit which is built on qctot and with the compose function gets reinitialized every times to clear the circuit. Also, qce.data.pop() is used to remove instructions from the error circuit after being used
 for i in range(1, 4):
     for j in range(5):
         if i == 1:
@@ -176,6 +180,7 @@ for i in range(1, 4):
             circarr[10+j, :] = statevector
             qce.data.pop(1)
             qce.data.pop(0)
+#the last circuit is the circuit with no error
 qctot = QuantumCircuit(5, 5)
 qctot.compose(qc, inplace=True)
 qctot.compose(qcd, inplace=True)
@@ -183,11 +188,13 @@ job_sv = statevector_simulator.run(transpile(qctot, statevector_simulator))
 result_sv = job_sv.result()
 statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4]).to_statevector()
 circarr[-1, :] = statevector 
-plt.show()
 
+#generator to have fidelity run on every element of the list
 fidarr = [fidelity(i, circarr[i], inp) for i in range(16)]
 for i in range(16):
     print(fidarr[i])
+
+#printing the results
 
 
 
