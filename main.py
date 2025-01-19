@@ -34,3 +34,7 @@ def applylogicalHadamard(qc):
     for i in range(8)
         qc.x(i)
     qc.ccx([6,7],8)
+
+def applylogicalTgate(qc):
+    qc.cx(0,[1,2])
+    qc.ccx([1,2],0)
