@@ -142,12 +142,12 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
     # plt.legend()
   
     plt.show()
-    return 
+ 
 
 
 State = shorEncode("+")
-Tgate = applylogicalTgate(State)
+Tgate = applylogicalTgate(applylogicalTgate(State))
 Tgate.draw("mpl")
-plt.show
+plt.show()
 Decode = shorDecode(Tgate)
 measurement(Decode, measurement_basis = "Y")
