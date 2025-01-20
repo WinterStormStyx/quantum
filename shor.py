@@ -71,6 +71,7 @@ def shorEncode(initial = "0"):
     qc.cx(0, [3, 6])
     qc.h([0, 3, 6])
     qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
+    return qc
 
 
 def shorDecode(qc):
@@ -82,6 +83,8 @@ def shorDecode(qc):
     Returns:
         QuantumCircuit: the circuit with the decoding section added
     """
+    qc = QuantumCircuit(9)
+
     qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
     qc.ccx([1, 4, 7], [2, 5, 8], [0, 3, 6])
     qc.h([0, 3, 6])
@@ -90,6 +93,17 @@ def shorDecode(qc):
     
     return qc
 
+def applylogicalTgate(qc):
+    
+    qc = QuantumCircuit(9)
+    qc.cx(0,[1,2])
+    qc.ccx(1,2,0)
+    qc.t(0)
+    qc.cx(0,[1,2])
+
+    
+
+    return qc
 
 def measurement(qc, measurement_basis = "Z", num_trials = 10):
     """Runs a quantum circuit using simulation and then measures the output (with noise), showing a plot of it.
@@ -125,6 +139,15 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
 
     plt.xlabel("Observables")
     plt.ylabel("Values")
-    plt.legend()
+    # plt.legend()
+  
     plt.show()
+    return 
 
+
+State = shorEncode("+")
+Tgate = applylogicalTgate(State)
+Tgate.draw("mpl")
+plt.show
+Decode = shorDecode(Tgate)
+measurement(Decode, measurement_basis = "Y")
