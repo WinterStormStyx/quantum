@@ -24,8 +24,6 @@ Tgate.mcp(np.pi/4, [0, 1, 3, 4], 2, ctrl_state="0001")
 Tgate.mcp(np.pi/4, [0, 1, 3, 4], 2, ctrl_state="1100")
 Tgate.x(2)
 
-# Tgate.draw(output="mpl")
-# plt.show()
 T = Tgate.to_gate()
 
 
