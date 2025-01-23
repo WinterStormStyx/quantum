@@ -19,7 +19,6 @@ err3 = qi.Operator([[1, 0], [0, -1]])
 err4 = qi.Operator([[-1, 0], [0, -1]])
 err5 = qi.Operator([[0, -1], [-1, 0]])
 
-
 def laflamme(inp, biterror=None, phaseerror=None):
     """Make the laflamme circuit
 

@@ -10,9 +10,13 @@ from LaflammeV2 import laflamme
 
 qc = laflamme("-")
 
+qc.draw(output="mpl")
+plt.show()
+
 statevector_simulator = Aer.get_backend('statevector_simulator')
 job_sv = statevector_simulator.run(transpile(qc, statevector_simulator))
 result_sv = job_sv.result()
 statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4])
-# statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4]).to_statevector()
+statevector = partial_trace(result_sv.get_statevector(), [0, 1, 3, 4]).to_statevector()
 print(statevector)
+print(np.dot(np.conj(inp.data), statevector.data)**2)
