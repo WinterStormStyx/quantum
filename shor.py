@@ -5,12 +5,32 @@ from qiskit.quantum_info import SparsePauliOp, Statevector
 from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 
 from qiskit_ibm_runtime import EstimatorV2
-from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
+from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2, FakeAlgiers
 
 from qiskit_aer import AerSimulator
 from Basis import Basis
 
 from matplotlib import pyplot as plt
+
+def applyLogicalNot(qc):
+    qc.z(0)
+    qc.z(3)
+    qc.z(6)
+
+# def applyLogicalHadamard(qc):
+#     qc.cx(0,[1,2])
+#     qc.cx(3,[4,5])
+#     qc.cx(6,[7,8])
+#     qc.h(0)
+#     qc.h(3)
+#     qc.h(6)
+#     qc.cx(0,[1,2])
+#     qc.cx(3,[4,5])
+#     qc.cx(6,[7,8])
+#     psi = Statevector(qc)
+#     print(psi)
+#     psi.draw("bloch")  # psi is a Statevector object
+#     plt.show()
 
 def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = False, drawStates = False):
     """Creates the circuit for Shors Code with a given initial state and provided errors
@@ -26,7 +46,6 @@ def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = Fals
     Returns:
         QuantumCircuit: the created quantum circuit
     """
-    
     qc = shorEncode(initial)
     
     # ERROR CAN OCCUR HERE
@@ -35,7 +54,7 @@ def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = Fals
     if phaseerrors is not None:
         qc.z(phaseerrors)
     # --------------------
-    
+
     qc = hadamard(qc)
     qc = shorDecode(qc)
     
@@ -45,9 +64,10 @@ def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = Fals
 
     if drawStates:
         psi = Statevector(qc)
+        print(psi)
         psi.draw("bloch")  # psi is a Statevector object
         plt.show()
-    
+
     return qc
     
 
@@ -74,10 +94,17 @@ def shorEncode(initial = "0"):
     qc.prepare_state("0", 7)
     qc.prepare_state("0", 8)
  
+    psi = Statevector(qc)
+    print(psi)
+    psi.draw("bloch")  # psi is a Statevector object
+    plt.show()
+
     qc.cx(0, [3, 6])
     qc.h([0, 3, 6])
     qc.cx([0, 0, 3, 3, 6, 6], [1, 2, 4, 5, 7, 8])
     
+    return qc
+
     return qc
 
 
@@ -98,7 +125,6 @@ def shorDecode(qc):
     
     return qc
 
-
 def measurement(qc, measurement_basis = "Z", num_trials = 10):
     """Runs a quantum circuit using simulation and then measures the output (with noise), showing a plot of it.
 
@@ -111,7 +137,7 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
     observables = [SparsePauliOp(label) for label in observables_labels]
     
     # Set up code to run on simulator 
-    backend = FakeAlmadenV2()
+    backend = FakeAlgiers()
     estimator = EstimatorV2(backend)
     
     # Convert to an ISA circuit and draw this
@@ -134,6 +160,7 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
     plt.xlabel("Observables")
     plt.ylabel("Values")
     plt.legend()
+    
     plt.show()
 
 
@@ -198,3 +225,4 @@ def simulate(qc, basis: Basis, shots = 1000):
     for (k, val) in sim_result.items():
             d[k.replace("0", "+", 1) if k[0] == "0" else k.replace("1", "-", 1)] = val
     return d
+
