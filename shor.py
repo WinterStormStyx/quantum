@@ -7,7 +7,12 @@ from qiskit.transpiler.preset_passmanagers import generate_preset_pass_manager
 from qiskit_ibm_runtime import EstimatorV2
 from qiskit_ibm_runtime.fake_provider import FakeAlmadenV2
 
+from qiskit.circuit.library.standard_gates import TGate
+from qiskit.circuit.library import TdgGate
+
+
 from matplotlib import pyplot as plt
+# from Hadamard import applylogicalHadamard
 
 def shor(initial = "0", biterrors = None, phaseerrors = None, drawCircuit = False, drawStates = False):
     """Creates the circuit for Shors Code with a given initial state and provided errors
@@ -58,7 +63,7 @@ def shorEncode(initial = "0"):
     # Build a quantum circuit
     qc = QuantumCircuit(9)
 
-    qc.prepare_state("0", 0)
+    qc.prepare_state(initial, 0)
     qc.prepare_state("0", 1)
     qc.prepare_state("0", 2)
     qc.prepare_state("0", 3)
@@ -66,7 +71,7 @@ def shorEncode(initial = "0"):
     qc.prepare_state("0", 5)
     qc.prepare_state("0", 6)
     qc.prepare_state("0", 7)
-    qc.prepare_state(initial, 8)
+    qc.prepare_state("0", 8)
  
     qc.cx(0, [3, 6])
     qc.h([0, 3, 6])
@@ -93,17 +98,47 @@ def shorDecode(qc):
     
     return qc
 
-def applylogicalTgate(qc):
+# def applylogicalTgate(qc):
     
-    qc = QuantumCircuit(9)
-    qc.cx(0,[1,2])
-    qc.ccx(1,2,0)
-    qc.t(0)
-    qc.cx(0,[1,2])
+qc = QuantumCircuit(9)
+qc.x(0)
+qc.x(3)
+controlled_T_gate = TGate().control(2)
+controlled_T_gate_inverse = TdgGate().control(2)
+qc.append(controlled_T_gate_inverse, [0,3,6])
+qc.x(6)
+qc.append(controlled_T_gate, [0,3,6])
+qc.x([0,3,6])
+
+qc.x(0)
+qc.x(6)
+qc.append(controlled_T_gate_inverse, [0,3,6])
+qc.x(6)
+qc.append(controlled_T_gate, [0,3,6])
+qc.x(0)
+
+
+
+
+qc.x(0)
+qc.x(6)
+
+
+
+
+qc.x(0)
+qc.x(6)
+qc.draw("mpl")
+plt.show()
+
+qc.append(controlled_T_gate, [0,3,6])
+qc.x(6)
+# qc.cct(0,3,6)
+
+
 
     
 
-    return qc
 
 def measurement(qc, measurement_basis = "Z", num_trials = 10):
     """Runs a quantum circuit using simulation and then measures the output (with noise), showing a plot of it.
@@ -114,6 +149,8 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
         num_trials (int, optional): How many times the simulation and measurement should be repeated. Defaults to 10.
     """
     observables_labels = [i*"I" + measurement_basis + (8-i)*"I" for i in range(9)]
+
+    # observables_labels = [measurement_basis]
     observables = [SparsePauliOp(label) for label in observables_labels]
     
     # Set up code to run on simulator 
@@ -145,9 +182,18 @@ def measurement(qc, measurement_basis = "Z", num_trials = 10):
  
 
 
-State = shorEncode("+")
-Tgate = applylogicalTgate(applylogicalTgate(State))
-Tgate.draw("mpl")
-plt.show()
-Decode = shorDecode(Tgate)
-measurement(Decode, measurement_basis = "Y")
+# State = shorEncode("-")
+# State.draw("mpl")
+# Tgate = applylogicalTgate(State)#.compose(applylogicalTgate(State))
+# Tgate.draw("mpl")
+# plt.show()
+# Decode = shorDecode(Tgate)
+# measurement(Decode, measurement_basis = "Y")
+
+# Test = QuantumCircuit(1)
+# Test.initialize("+")
+# Test.t(0)
+# Test.t(0)
+# Test.draw("mpl")
+# plt.show()
+# measurement(Test, measurement_basis = "Y")
