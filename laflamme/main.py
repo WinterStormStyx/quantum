@@ -54,23 +54,19 @@ qc.measure(5, anc)
 print(measure(qc, Basis.Z))
 
 
-# T gate
+# T gate -- apply 4 rotations to get from "+" to "-" state
 
 cl = ClassicalRegister(5)
 qu = QuantumRegister(5)
 qc = QuantumCircuit(qu, cl)
 
-qc = encode(qc, "0")
+qc = encode(qc, "+")
+qc = t(qc)
+qc = t(qc)
 qc = t(qc)
 qc = t(qc)
 qc = decode(qc, cl)
 
-print(measure(qc, basis=Basis.Z))
-
-# Hold on does this still work???
-
-
-
-
+print(measure(qc, basis=Basis.X))
 
 
