@@ -1,20 +1,13 @@
 from laflamme.measure import measure as lmeasure
+from laflamme.measure import Basis as LBasis
 from laflamme.code import laflamme
 
 from shor.measure import measure as smeasure
+from shor.measure import Basis as SBasis
 from shor.code import shor
 
 import random
-from enum import Enum
 from matplotlib import pyplot as plt
-
-class Basis(Enum):
-    """ Helperclass to specify the basis to measure in
-        Options are the X, Y, and Z basis
-    """
-    X = "X"
-    Z = "Z"
-    Y = "Y"
 
 def randomError(num_qubits, prob):
     """Add random error to a circuit
@@ -31,12 +24,13 @@ def randomError(num_qubits, prob):
     return []
 
 counts = {"5":[], "9":[]}
-error_rate = [0.5, 0.1]# [0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005]
+error_rate = [0.5, 0.4, 0.3, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005]
 
 for qubits in [5, 9]:
     for prob in error_rate:
         count = 0
         iteration = 500
+        
         for error in range(iteration):
             phaseerror = []
             biterror = []
@@ -49,15 +43,13 @@ for qubits in [5, 9]:
             biterror = biterror if len(biterror) != 0 else None
 
             if(qubits == 5):
-                d1 = lmeasure(laflamme("+", biterror=biterror, phaseerror=phaseerror), Basis.Z)
-                d2 = lmeasure(laflamme("+", biterror=biterror, phaseerror=phaseerror), Basis.X)
+                d1 = lmeasure(qc=laflamme("+", biterror=biterror, phaseerror=phaseerror), basis=LBasis.Z)
+                d2 = lmeasure(qc=laflamme("+", biterror=biterror, phaseerror=phaseerror), basis=LBasis.X)
             else:
-                d1 = smeasure(shor("+", biterror=biterror, phaseerror=phaseerror), Basis.Z)
-                d2 = smeasure(shor("+", biterror=biterror, phaseerror=phaseerror), Basis.X)
-            
+                d1 = smeasure(qc=shor("+", biterror=biterror, phaseerror=phaseerror), basis=SBasis.Z)
+                d2 = smeasure(qc=shor("+", biterror=biterror, phaseerror=phaseerror), basis=SBasis.X)
             result = dict((k, sum(d[k] for d in (d1, d2) if k in d)) for k in (d1 | d2).keys())
             count += int(max(result, key=result.get)[0] == "+")
-        print(prob, qubits, count/iteration)
         counts[str(qubits)].append(count / iteration)
  
        
